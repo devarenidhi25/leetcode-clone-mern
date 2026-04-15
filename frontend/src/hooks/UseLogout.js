@@ -1,37 +1,39 @@
 import { useState } from "react"
 import { useAuthContext } from "../context/AuthContext"
-import { useToast } from "@chakra-ui/react"
+import toast from "react-hot-toast";
 
 const UseLogout = () => {
- const [loading, setloading] = useState(false);
- const {Authuser,setAuthuser}=useAuthContext();
- const toast=useToast();
- const logout=async()=>{
-    setloading(true);
-    try {
-        const res=await fetch('https://coding-engine-trial.onrender.com/api/auth/logout',{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        });
-        const data=await res.json();
-        if(data.error){
-            throw new Error(data.error);
+    const [loading, setloading] = useState(false);
+    const { setAuthuser } = useAuthContext();
+
+    const logout = async () => {
+        setloading(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/auth/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await res.json();
+
+            if (data.error) {
+                toast.error(data.error);
+                return;
+            }
+
+            localStorage.removeItem('AuthUser');
+            setAuthuser(null);
+            toast.success("Logged out successfully!");
+            window.location.href = "/";
+        } catch (error) {
+            toast.error(error.message || "Error during logout");
+            console.error("Logout error:", error);
+        } finally {
+            setloading(false);
         }
-        localStorage.removeItem('AuthUser');
-        setAuthuser(null);
-    } catch (error) {
-        toast({
-            title:"ERROR OCCURED IN LOGOUT",
-            description:error.message,
-            status:"error",
-            duration:2000,
-        })
     }
-    finally{
-        setloading(false);
-    }
- }
- return {loading,logout}
+
+    return { loading, logout }
 }
 
 export default UseLogout
