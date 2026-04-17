@@ -7,6 +7,10 @@ import theme from './theme.js'
 import { AuthContextProvider } from './context/AuthContext.jsx'
 import { CodeExecutionProvider } from './Context.jsx'
 import { BrowserRouter } from 'react-router-dom'
+
+// Set dark mode on app start
+document.documentElement.classList.add('dark')
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
