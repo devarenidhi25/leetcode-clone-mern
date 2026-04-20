@@ -3,7 +3,7 @@ import list from '../assets/list.svg'
 import next from '../assets/next.svg';
 import prev from '../assets/prev.svg';
 import { CodeExecutionContext } from '../Context'
-import { executeCode } from '../api';
+import { executeCode, getProblems } from '../api';
 import { Button, Toast, useToast } from '@chakra-ui/react';
 import UseLogout from '../hooks/UseLogout';
 import { useAuthContext } from '../context/AuthContext';
@@ -33,11 +33,7 @@ const Navbar = () => {
 
     const fetchData = async () => {
         try {
-            const res = await fetch('https://coding-engine-trial.onrender.com/api/problems/', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
-            const result = await res.json();
+            const result = await getProblems();
             setarr(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -86,7 +82,7 @@ const Navbar = () => {
                     {/* Left - Logo and Navigation */}
                     <div className='flex items-center gap-4'>
                         <h1 className='gradient-text text-2xl font-bold'>
-                            ✨ CleanCode
+                            CleanCode
                         </h1>
                         <div className='hidden md:flex items-center gap-2 bg-slate-700 rounded-lg px-2 py-1'>
                             {isProblemBar && (
@@ -113,24 +109,8 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* Center - Action Buttons */}
+                    {/* Center - Empty Space */}
                     <div className='flex items-center gap-3'>
-                        <button
-                            onClick={run_helper2}
-                            disabled={load1}
-                            className='flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2 px-4 rounded-lg transition transform hover:scale-105 disabled:opacity-50'
-                        >
-                            <Play size={18} />
-                            <span className='hidden sm:inline'>Run</span>
-                        </button>
-                        <button
-                            onClick={run_helper}
-                            disabled={load}
-                            className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white font-semibold py-2 px-4 rounded-lg transition transform hover:scale-105 disabled:opacity-50'
-                        >
-                            <Send size={18} />
-                            <span className='hidden sm:inline'>Submit</span>
-                        </button>
                     </div>
 
                     {/* Right - User & Features */}
@@ -151,7 +131,13 @@ const Navbar = () => {
                         </button>
                         <div className='hidden md:flex items-center gap-2 ml-2'>
                             <button
-                                onClick={handleUsernameClick}
+                                onClick={() => navigate('/problems')}
+                                className='bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white px-3 py-2 rounded-lg transition text-sm font-semibold'
+                            >
+                                Browse Problems
+                            </button>
+                            <button
+                                onClick={() => navigate('/profile')}
                                 className='bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white px-3 py-2 rounded-lg transition text-sm font-semibold'
                             >
                                 {Authuser?.username || '👤'}

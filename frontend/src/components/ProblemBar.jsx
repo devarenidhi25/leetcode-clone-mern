@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { CodeExecutionContext } from '../Context';
 import { useAuthContext } from '../context/AuthContext';
+import { getProblems, getSubmissions } from '../api';
 const ProblemBar = () => {
   const { isProblemBar, setisProblemBar, data, setData ,probId,setprobId} = useContext(CodeExecutionContext);
   const [loading, setLoading] = useState(true);
@@ -9,13 +10,7 @@ const ProblemBar = () => {
 const {Authuser}=useAuthContext()
   const fetchData = async () => {
     try {
-      const res = await fetch('https://coding-engine-trial.onrender.com/api/problems/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await res.json();
+      const result = await getProblems();
       console.log('Fetched Data problem data:', result); // Debugging log
       setData(result); // Set the fetched data in state
       const statusPromises = result.map(async problem => {
@@ -41,13 +36,7 @@ const {Authuser}=useAuthContext()
   };
   const fetchData_solved= async (prob) => {
     try {
-        const res = await fetch(`https://coding-engine-trial.onrender.com/api/submit/${Authuser._id}/${prob}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const result = await res.json();
+        const result = await getSubmissions(Authuser._id, prob);
         // console.log(result)
         const hasSuccess=result.some(item=>item.result.status==="success");
         // console.log(hasSuccess);

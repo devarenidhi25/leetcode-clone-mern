@@ -1,4 +1,6 @@
 import Problem from "../models/ProblemModel.js";
+import UserSubmission from "../models/UserSubmissionModel.js";
+
 export const addProblem=async(req,res)=>{
    try {
     const {problem_name,problem_desc,problem_examples,constraints,category,tags,solution_skeleton,hints,testcases}=req.body;
@@ -25,22 +27,56 @@ export const addProblem=async(req,res)=>{
     else{
         res.status(400).json({error:"INVALID PROBLEM DATA"})
     }
-    // res.status(201).json({message:"problem added successfully"});
    } catch (error) {
     console.log("error in PROBLEM CONTROLLER",error.message)
     res.status(500).json({ error:error.message} )
    }
 }
+
 export const getProblems = async (req, res) => {
     try {
-      const problems = await Problem.find();
+      const { difficulty, tags, search, userId } = req.query;
+      let query = {};
+
+      // Filter by difficulty
+      if (difficulty && difficulty !== 'all') {
+        query.category = difficulty;
+      }
+
+      // Filter by tags
+      if (tags) {
+        const tagArray = Array.isArray(tags) ? tags : [tags];
+        query.tags = { $in: tagArray };
+      }
+
+      // Search by problem name
+      if (search) {
+        query.problem_name = { $regex: search, $options: 'i' };
+      }
+
+      let problems = await Problem.find(query);
+
+      // Get solved status if userId is provided
+      if (userId) {
+        const solvedProblems = await UserSubmission.find({
+          userId,
+          'result.status': 'success'
+        }).distinct('problemId');
+
+        problems = problems.map(problem => ({
+          ...problem.toObject(),
+          isSolved: solvedProblems.includes(problem._id.toString())
+        }));
+      }
+
       res.status(200).json(problems);
     } catch (error) {
       console.log("error in retrieving problems", error.message);
       res.status(500).json({ error: error.message });
     }
   };
-  export const getProblemById = async (req, res) => {
+
+export const getProblemById = async (req, res) => {
     try {
       const { id } = req.params;
       const problem = await Problem.findById(id);
@@ -52,4 +88,14 @@ export const getProblems = async (req, res) => {
       console.log("error in retrieving problem by ID", error.message);
       res.status(500).json({ error: error.message });
     }
-  };  
+  };
+
+export const getAllTags = async (req, res) => {
+    try {
+      const tags = await Problem.distinct('tags');
+      res.status(200).json({ tags: tags.sort() });
+    } catch (error) {
+      console.log("error in retrieving tags", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  };

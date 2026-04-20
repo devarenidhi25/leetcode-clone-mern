@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { CodeExecutionContext } from '../Context';
+import { getSubmissions } from '../api';
 
 const UserSubmission = () => {
     const { Authuser } = useAuthContext();
@@ -12,13 +13,7 @@ const UserSubmission = () => {
 
     const fetchData = async () => {
         try {
-            const res = await fetch(`https://coding-engine-trial.onrender.com/api/submit/${Authuser._id}/${probId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const result = await res.json();
+            const result = await getSubmissions(Authuser._id, probId);
             // console.log(result)
             const hasSuccess=result.some(item=>item.result.status==="success");
             console.log(hasSuccess);

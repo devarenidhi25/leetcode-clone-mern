@@ -15,7 +15,10 @@ const userSubmissionSchema = new mongoose.Schema({
       enum: ['success', 'failure', 'timeout', 'error'], 
       required: true 
     },
-   
+    testsPassed: { type: Number, default: 0 },
+    totalTests: { type: Number, default: 0 },
+    output: { type: String, default: "" },
+    error: { type: String, default: "" }
   },
   submissionTime: { type: Date, default: Date.now }
 });

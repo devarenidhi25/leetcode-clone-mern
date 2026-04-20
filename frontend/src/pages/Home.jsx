@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -6,14 +6,20 @@ import Split from 'react-split';
 import ProblemDesc from '../components/ProblemDesc';
 import CodeSpace from '../components/CodeSpace';
 import TestSpace from '../components/TestSpace';
+import ProblemsPage from './ProblemsPage';
 import { Code, Users, Zap, Shield, Github, ArrowRight } from 'lucide-react';
 
-const Home = () => {
+const Home = ({ selectedProblemId }) => {
     const { Authuser } = useAuthContext();
     const navigate = useNavigate();
+    const [showEditor, setShowEditor] = useState(!!selectedProblemId);
 
-    // If user is authenticated, show the code editor
-    if (Authuser) {
+    const handleSelectProblem = (problemId) => {
+        setShowEditor(true);
+    };
+
+    // If user is authenticated and wants to see the editor
+    if (Authuser && showEditor) {
         return (
             <>
                 <Navbar />
@@ -38,6 +44,16 @@ const Home = () => {
         );
     }
 
+    // If user is authenticated, show problems list
+    if (Authuser) {
+        return (
+            <>
+                <Navbar />
+                <ProblemsPage onSelectProblem={handleSelectProblem} />
+            </>
+        );
+    }
+
     // Landing page for unauthenticated users
     return (
         <div className='bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen'>
@@ -49,7 +65,7 @@ const Home = () => {
 
             {/* Navigation */}
             <nav className='relative z-20 flex justify-between items-center px-6 py-4 border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm sticky top-0'>
-                <h1 className='gradient-text text-3xl font-bold'>✨ CleanCode</h1>
+                <h1 className='gradient-text text-3xl font-bold'>CleanCode</h1>
                 <div className='flex gap-3'>
                     <button
                         onClick={() => navigate('/login')}

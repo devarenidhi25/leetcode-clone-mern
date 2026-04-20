@@ -1,12 +1,17 @@
 import axios from "axios";
 import { LANGUAGE_VERSIONS } from "./constant.js";
 
-const API = axios.create({
+const PISTON_API = axios.create({
   baseURL: "https://emkc.org/api/v2/piston",
 });
 
+const BACKEND_API = axios.create({
+  baseURL: "http://localhost:4000/api",
+  withCredentials: true,
+});
+
 export const executeCode = async (language, sourceCode) => {
-  const response = await API.post("/execute", {
+  const response = await PISTON_API.post("/execute", {
     language: language,
     version: LANGUAGE_VERSIONS[language],
     files: [
@@ -15,7 +20,98 @@ export const executeCode = async (language, sourceCode) => {
       },
     ],
   });
-//   const response2=await API.get('/runtimes')
-//   console.log(response2.data)
+  return response.data;
+};
+
+// Problems API
+export const getProblems = async (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.difficulty) params.append('difficulty', filters.difficulty);
+  if (filters.tags) {
+    if (Array.isArray(filters.tags)) {
+      filters.tags.forEach(tag => params.append('tags', tag));
+    } else {
+      params.append('tags', filters.tags);
+    }
+  }
+  if (filters.search) params.append('search', filters.search);
+  if (filters.userId) params.append('userId', filters.userId);
+  
+  const response = await BACKEND_API.get(`/problems?${params.toString()}`);
+  return response.data;
+};
+
+export const getProblemById = async (id) => {
+  const response = await BACKEND_API.get(`/problems/${id}`);
+  return response.data;
+};
+
+export const getAllTags = async () => {
+  const response = await BACKEND_API.get('/problems/tags/all');
+  return response.data.tags;
+};
+
+// User API
+export const getUserStats = async (userId) => {
+  const response = await BACKEND_API.get(`/users/stats/${userId}`);
+  return response.data;
+};
+
+export const getRecommendedProblems = async () => {
+  const response = await BACKEND_API.get('/users/recommendations');
+  return response.data;
+};
+
+export const updateStreak = async () => {
+  const response = await BACKEND_API.post('/users/streak/update');
+  return response.data;
+};
+
+// Friend API
+export const sendFriendRequest = async (receiverId) => {
+  const response = await BACKEND_API.post('/friends/send', { receiverId });
+  return response.data;
+};
+
+export const acceptFriendRequest = async (requestId) => {
+  const response = await BACKEND_API.post('/friends/accept', { requestId });
+  return response.data;
+};
+
+export const rejectFriendRequest = async (requestId) => {
+  const response = await BACKEND_API.post('/friends/reject', { requestId });
+  return response.data;
+};
+
+export const getFriendList = async (userId) => {
+  const response = await BACKEND_API.get(`/friends/list/${userId}`);
+  return response.data.friends;
+};
+
+export const getPendingRequests = async () => {
+  const response = await BACKEND_API.get('/friends/requests/pending');
+  return response.data.requests;
+};
+
+// Submission API
+export const submitCode = async (userId, problemId, code, language, result) => {
+  const response = await BACKEND_API.post('/submit', {
+    userId,
+    problemId,
+    code,
+    language,
+    result,
+    submissionTime: new Date(),
+  });
+  return response.data;
+};
+
+export const getSubmissions = async (userId, problemId) => {
+  const response = await BACKEND_API.get(`/submit/${userId}/${problemId}`);
+  return response.data;
+};
+
+export const getAllUserSubmissions = async (userId) => {
+  const response = await BACKEND_API.get(`/submit/${userId}`);
   return response.data;
 };

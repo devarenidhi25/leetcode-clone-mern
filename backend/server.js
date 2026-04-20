@@ -8,6 +8,8 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./src/routes/AuthRoutes.js";
 import problemRoute from "./src/routes/ProblemRoutes.js";
 import userSubmissionRoute from "./src/routes/UserSubmissionRoute.js";
+import friendRoutes from "./src/routes/FriendRoutes.js";
+import userRoutes from "./src/routes/UserRoutes.js";
 import connectDB from "./src/DB/connectDB.js";
 
 // Load environment variables
@@ -27,12 +29,18 @@ connectDB();
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors()); // Allow cross-origin requests
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+})); // Allow cross-origin requests from frontend
 
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoute);
 app.use("/api/submit", userSubmissionRoute);
+app.use("/api/friends", friendRoutes);
+app.use("/api/users", userRoutes);
+
 if(process.env.NODE_ENV==="production"){
 
 // Serve static files from the frontend

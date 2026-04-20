@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
         required:true,
         enum:['male','female']
     },
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    solvedProblems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Problem' }],
+    streak: { type: Number, default: 0 },
+    lastSolvedDate: { type: Date, default: null },
 },{timestamps:true});
 
 const User = mongoose.model('User', userSchema);

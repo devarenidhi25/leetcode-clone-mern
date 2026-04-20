@@ -2,21 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CodeExecutionContext } from '../Context';
 import topics from '../assets/tags.svg';
 import UserSubmission from './UserSubmission';
-import { BookOpen, Award } from 'lucide-react';
+import { BookOpen, Award, Code2 } from 'lucide-react';
+import { getProblems, getProblemById } from '../api';
 
 const ProblemDesc = () => {
   const [desc, setDesc] = useState(true);
   const [sub, setSub] = useState(false);
+  const [sol, setSol] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedSolutionLang, setSelectedSolutionLang] = useState('javascript');
   const { data, setData, setprobId, probId, setCurrentProblem, currentProblem } = useContext(CodeExecutionContext);
 
   const fetchData = async () => {
     try {
-      const res = await fetch('https://coding-engine-trial.onrender.com/api/problems/', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await res.json();
+      const result = await getProblems();
       setCurrentProblem(result[0]);
       setprobId(result[0]._id);
       setData(result)
@@ -29,11 +28,7 @@ const ProblemDesc = () => {
 
   const fetchData1 = async (probId) => {
     try {
-      const res = await fetch(`https://coding-engine-trial.onrender.com/api/problems/${probId}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await res.json();
+      const result = await getProblemById(probId);
       setCurrentProblem(result);
       setLoading(false);
     } catch (error) {
@@ -60,10 +55,17 @@ const ProblemDesc = () => {
       case 1:
         setDesc(true);
         setSub(false);
+        setSol(false);
         break;
       case 2:
         setDesc(false);
         setSub(true);
+        setSol(false);
+        break;
+      case 3:
+        setDesc(false);
+        setSub(false);
+        setSol(true);
         break;
       default:
         break;
@@ -113,10 +115,23 @@ const ProblemDesc = () => {
             Submissions
           </div>
         </button>
+        <button
+          onClick={() => handleClick(3)}
+          className={`px-4 py-3 font-semibold transition border-b-2 ${
+            sol
+              ? 'border-blue-500 text-blue-400'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <div className='flex items-center gap-2'>
+            <Code2 size={18} />
+            Solutions
+          </div>
+        </button>
       </div>
 
       {/* Content */}
-      {desc && !sub ? (
+      {desc && !sub && !sol ? (
         <div className='p-6 max-h-screen overflow-y-auto'>
           <div className='space-y-6'>
             {loading || !currentProblem ? (
@@ -180,11 +195,61 @@ const ProblemDesc = () => {
             )}
           </div>
         </div>
-      ) : (
+      ) : sub && !desc && !sol ? (
         <div className='p-6'>
           <UserSubmission />
         </div>
-      )}
+      ) : sol && !desc && !sub ? (
+        <div className='p-6 max-h-screen overflow-y-auto'>
+          <div className='space-y-6'>
+            <div>
+              <h2 className='text-2xl font-bold text-white mb-4'>Solutions</h2>
+              <p className='text-slate-400 mb-4'>View solutions in different programming languages:</p>
+            </div>
+
+            {/* Language Selector */}
+            <div className='flex gap-2 flex-wrap'>
+              {currentProblem?.solution_skeleton ? Object.keys(currentProblem.solution_skeleton).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setSelectedSolutionLang(lang)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    selectedSolutionLang === lang
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                </button>
+              )) : null}
+            </div>
+
+            {/* Solution Code */}
+            {currentProblem?.solution_skeleton?.[selectedSolutionLang] ? (
+              <div className='bg-slate-900/50 border border-slate-700 rounded-lg p-4'>
+                <div className='bg-slate-800/50 rounded p-4 text-slate-200 font-mono text-sm overflow-x-auto'>
+                  <pre>{currentProblem.solution_skeleton[selectedSolutionLang]}</pre>
+                </div>
+              </div>
+            ) : (
+              <div className='bg-slate-800/30 border border-slate-700 rounded-lg p-4 text-slate-400'>
+                No solution available for this language
+              </div>
+            )}
+
+            {/* Alternative Solutions Info */}
+            <div className='bg-blue-900/20 border border-blue-700 rounded-lg p-4'>
+              <h3 className='text-lg font-semibold text-blue-300 mb-2'>💡 Tips</h3>
+              <ul className='text-slate-300 space-y-2 list-disc list-inside'>
+                <li>Try to solve this problem on your own first</li>
+                <li>Use hints if you're stuck</li>
+                <li>Compare your solution with the optimal solution</li>
+                <li>Understand the time and space complexity</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 };
