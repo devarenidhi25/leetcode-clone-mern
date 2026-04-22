@@ -10,6 +10,7 @@ import problemRoute from "./src/routes/ProblemRoutes.js";
 import userSubmissionRoute from "./src/routes/UserSubmissionRoute.js";
 import friendRoutes from "./src/routes/FriendRoutes.js";
 import userRoutes from "./src/routes/UserRoutes.js";
+import codeExecutionRoute from "./src/routes/CodeExecutionRoute.js";
 import connectDB from "./src/DB/connectDB.js";
 
 // Load environment variables
@@ -40,6 +41,7 @@ app.use("/api/problems", problemRoute);
 app.use("/api/submit", userSubmissionRoute);
 app.use("/api/friends", friendRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/execute", codeExecutionRoute);
 
 if(process.env.NODE_ENV==="production"){
 

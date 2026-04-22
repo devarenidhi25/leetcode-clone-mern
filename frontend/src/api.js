@@ -1,26 +1,31 @@
 import axios from "axios";
 import { LANGUAGE_VERSIONS } from "./constant.js";
 
-const PISTON_API = axios.create({
-  baseURL: "https://emkc.org/api/v2/piston",
-});
-
 const BACKEND_API = axios.create({
   baseURL: "http://localhost:4000/api",
   withCredentials: true,
 });
 
 export const executeCode = async (language, sourceCode) => {
-  const response = await PISTON_API.post("/execute", {
-    language: language,
-    version: LANGUAGE_VERSIONS[language],
-    files: [
-      {
-        content: sourceCode,
-      },
-    ],
-  });
-  return response.data;
+  try {
+    const payload = {
+      language: language,
+      version: LANGUAGE_VERSIONS[language],
+      files: [
+        {
+          content: sourceCode,
+        },
+      ],
+    };
+    
+    console.log("Executing code with backend:", payload);
+    // Call backend execution endpoint instead of Piston
+    const response = await BACKEND_API.post("/execute/execute", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Code execution error:", error.response?.status, error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Problems API
